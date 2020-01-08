@@ -80,6 +80,7 @@ const receivePacket = (wsClient, packet, delayBetweenPackets = config.packetDela
   call(wsClient, 'receive', packet, delayBetweenPackets)
 
 module.exports = {
+  loadScript,
   startScriptLoaderShell,
   pause,
   sendPacket,
