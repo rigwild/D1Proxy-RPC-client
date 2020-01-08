@@ -5,25 +5,40 @@ const path = require('path')
 const config = require('./config')
 
 /**
- * Start a shell `RPC>` which will load any scripts from the `scripts` directory
+ * Load any script from the `scripts` directory.
+ * Removes script cache everytime so scripts can be edited without restarting process.
  * @param {any} wsClient WebSocket client
+ * @param {string} scriptName Name of the script to run
+ * @returns {void}
  */
-const startScriptLoaderShell = (wsClient) => {
+const loadScript = async (wsClient, scriptName) => {
+  // Read the scripts directory
+  const scripts = await fs.promises.readdir(path.resolve(__dirname, 'scripts'))
+
+  // Search if it exists then run it
+  if (scripts.find(x => x.toLowerCase() === scriptName.toLowerCase())) {
+    console.log(`Running the script "${scriptName}".`)
+    const loadedScriptPath = path.resolve(__dirname, 'scripts', scriptName)
+    delete require.cache[loadedScriptPath]
+    require(loadedScriptPath).run(wsClient)
+  }
+  else console.log(`The script "${scriptName}" was not found in the "scripts" directory.`)
+}
+
+/**
+ * Start a shell `RPC>` which will load any scripts from the `scripts` directory.
+ * 
+ * Removes script cache everytime so scripts can be edited without restarting process.
+ * @param {any} wsClient WebSocket client
+ * @returns {void}
+ */
+const startScriptLoaderShell = wsClient => {
   let shell = readline.createInterface(process.stdin, process.stdout)
   shell.setPrompt('RPC> ')
   shell.prompt()
   shell.on('line', async line => {
-    // A script was asked, read the scripts directory
-    const scripts = await fs.promises.readdir(path.resolve(__dirname, 'scripts'))
-
-    // The script was found, run it
-    if (scripts.find(x => x.toLowerCase() === line.toLowerCase())) {
-      console.log(`Running the script "${line}".`)
-      // TODO: loaded script is cached so can't be edited on-the-fly
-      const loadedScript = require(path.resolve(__dirname, 'scripts', line))
-      loadedScript.run(wsClient)
-    }
-    else console.log(`The script "${line}" was not found in the "scripts" directory.`)
+    if (!line) return shell.prompt()
+    await loadScript(wsClient, line)
     shell.prompt()
   }).on('close', () => process.exit(0))
 }
