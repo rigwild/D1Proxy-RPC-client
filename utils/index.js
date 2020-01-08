@@ -1,4 +1,5 @@
 module.exports = {
   ...require('./common'),
-  ...require('./core')
+  ...require('./core'),
+  ...require('./gameMechanic')
 }

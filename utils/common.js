@@ -7,6 +7,11 @@ const config = require('../config')
 const pause = ms => new Promise(res => setTimeout(res, ms))
 
 /**
+ * Generate a random string of size 4
+ */
+const randomStrFour = () => Math.random().toString(36).slice(2, 6)
+
+/**
  * RPC call
  * @param {any} wsClient WebSocket client
  * @param {string[]} packetList List of packets to send
@@ -35,8 +40,10 @@ const sendPacket = (wsClient, packet, delayBetweenPackets = config.packetDelayMs
 const receivePacket = (wsClient, packet, delayBetweenPackets = config.packetDelayMs) =>
   call(wsClient, 'receive', packet, delayBetweenPackets)
 
+
 module.exports = {
   pause,
+  randomStrFour,
   sendPacket,
   receivePacket
 }

@@ -13,12 +13,12 @@ const { sendPacket, receivePacket } = require('./common')
  */
 const loadScript = async (wsClient, scriptName) => {
   // Read the scripts directory
-  const scripts = await fs.promises.readdir(path.resolve(__dirname, 'scripts'))
+  const scripts = await fs.promises.readdir(path.resolve(__dirname, '..', 'scripts'))
 
   // Search if it exists then run it
   if (scripts.find(x => x.toLowerCase() === scriptName.toLowerCase())) {
     console.log(`Running the script "${scriptName}".`)
-    const loadedScriptPath = path.resolve(__dirname, 'scripts', scriptName)
+    const loadedScriptPath = path.resolve(__dirname, '..', 'scripts', scriptName)
     delete require.cache[loadedScriptPath]
     require(loadedScriptPath).run(wsClient)
   }
@@ -41,6 +41,8 @@ const startScriptLoaderShell = wsClient => {
 
     // Check if run command
     if (line.startsWith('run ')) await loadScript(wsClient, line.substring(4))
+    else if (line.startsWith('send ')) await sendPacket(wsClient, line.substring(5))
+    else if (line.startsWith('receive ')) await receivePacket(wsClient, line.substring(8))
     shell.prompt()
   }).on('close', () => process.exit(0))
 }
