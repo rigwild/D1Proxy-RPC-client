@@ -8,6 +8,8 @@ const ws = new WebSocket(config.serverURI)
 ws.on('open', () => {
   ws.send('hello')
   startScriptLoaderShell(ws)
+
+  if (process.argv.length > 2) loadScript(ws, process.argv[2])
 })
 
 ws.on('message', async data => {
